@@ -65,12 +65,45 @@ void AOutOfBalanceCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOutOfBalanceCharacter::Look);
+
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOutOfBalanceCharacter::Interact);
 	}
 	else
 	{
 		UE_LOG(LogOutOfBalance, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+
+void AOutOfBalanceCharacter::Interact()
+{
+	FVector ActorForward = GetActorForwardVector();
+	// 1. Direção da Câmara com INCLINAÇÃO para o chão
+	FRotator CameraRotation = FollowCamera->GetComponentRotation();
+	// Alteramos o Pitch para -15.0f (ou -20.0f) para a esfera descer em direção ao chão
+	FRotator InclinedRotation = FRotator(-25.0f, CameraRotation.Yaw, 0.0f);
+	FVector InteractionDirection = InclinedRotation.Vector();
+	// 2. Verificação de Ângulo (Dot Product)
+	// Comparamos o Ator com a direção da câmara (usamos a achatada para o Dot ser mais justo)
+	FVector FlatCameraForward = FRotator(0.0f, CameraRotation.Yaw, 0.0f).Vector();
+	float CosAngle = FVector::DotProduct(ActorForward, FlatCameraForward);
+	if (CosAngle < 0.2f)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Não podes interagir de costas!"));
+		return;
+	}
+	// 3. Configuração do Start e End
+	// Start sai do peito (Z+60) e End usa a direção inclinada
+	FVector start = GetActorLocation() + FVector(0.0f, 0.0f, 60.0f) + (ActorForward * 40.0f);
+	FVector end = start + (InteractionDirection * maxInteractionDistance);
+	DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 5.0f);
+
+	FCollisionShape interactionSphere = FCollisionShape::MakeSphere(interactionSphereRadius);
+	DrawDebugSphere(GetWorld(), end, interactionSphereRadius, 20, FColor::Red, false, 5.0f);
+
+	//GetWorld()->SweepSingleByChannel();
+}
+
 
 void AOutOfBalanceCharacter::Move(const FInputActionValue& Value)
 {

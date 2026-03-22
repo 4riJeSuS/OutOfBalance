@@ -49,6 +49,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+	/** Inract with objects */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* InteractAction;
+
 public:
 
 	/** Constructor */
@@ -92,5 +96,13 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	void Interact();
+
+	UPROPERTY(EditAnywhere)
+	float maxInteractionDistance = 100.0f;
+
+	UPROPERTY(EditAnywhere)
+	float interactionSphereRadius = 75.0f;
 };
 
