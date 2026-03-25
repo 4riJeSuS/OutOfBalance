@@ -12,6 +12,9 @@
 #include "InputActionValue.h"
 #include "OutOfBalance.h"
 
+#include "CollectableItem.h"
+#include "Lock.h"
+
 AOutOfBalanceCharacter::AOutOfBalanceCharacter()
 {
 	// Set size for collision capsule
@@ -101,7 +104,46 @@ void AOutOfBalanceCharacter::Interact()
 	FCollisionShape interactionSphere = FCollisionShape::MakeSphere(interactionSphereRadius);
 	DrawDebugSphere(GetWorld(), end, interactionSphereRadius, 20, FColor::Red, false, 5.0f);
 
-	//GetWorld()->SweepSingleByChannel();
+	FHitResult hitResult;
+	bool hasHit = GetWorld()->SweepSingleByChannel(
+		hitResult, 
+		start, 
+		end, 
+		FQuat::Identity, 
+		ECC_GameTraceChannel2,
+		interactionSphere
+	);
+
+	if (hasHit) 
+	{
+		AActor* hitActor = hitResult.GetActor();
+
+		if (hitActor->ActorHasTag("CollectableItem")) {
+			ACollectableItem* collectableItem = Cast<ACollectableItem>(hitActor);
+			if (collectableItem) {
+				inventory.Add(collectableItem->itemName);
+
+				collectableItem->Destroy();
+			}
+		} else if (hitActor->ActorHasTag("Lock")) {
+			ALock* lockActor = Cast<ALock>(hitActor);
+			if (lockActor) {
+				if (!lockActor->getIsKeyPlaced()) {
+					int32 itemsRemoved = inventory.RemoveSingle(lockActor->keyItemName);
+					if (itemsRemoved) {
+						lockActor->setIsKeyPlaced(true);
+					} else {
+						UE_LOG(LogTemp, Display, TEXT("Key item not in inventory."));
+					}
+				}else {
+					inventory.Add(lockActor->keyItemName);
+					lockActor->setIsKeyPlaced(false);
+				}
+			}
+		}
+	} else {
+		UE_LOG(LogTemp, Display, TEXT("No actor hit."));
+	}
 }
 
 
