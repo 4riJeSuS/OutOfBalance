@@ -80,23 +80,16 @@ void AOutOfBalanceCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void AOutOfBalanceCharacter::Interact()
 {
+	// 1. DEFINIR A DIREÇÃO: Usamos apenas o Forward do Ator
 	FVector ActorForward = GetActorForwardVector();
-	// 1. Direção da Câmara com INCLINAÇÃO para o chão
-	FRotator CameraRotation = FollowCamera->GetComponentRotation();
-	// Alteramos o Pitch para -15.0f (ou -20.0f) para a esfera descer em direção ao chão
-	FRotator InclinedRotation = FRotator(-25.0f, CameraRotation.Yaw, 0.0f);
+
+	// Criamos uma rotação baseada no ActorForward, mas com a inclinação para o chão
+	// Pegamos no Yaw do ator e aplicamos o Pitch de -25.0f
+	FRotator ActorRotation = GetActorRotation();
+	FRotator InclinedRotation = FRotator(-25.0f, ActorRotation.Yaw, 0.0f);
 	FVector InteractionDirection = InclinedRotation.Vector();
-	// 2. Verificação de Ângulo (Dot Product)
-	// Comparamos o Ator com a direção da câmara (usamos a achatada para o Dot ser mais justo)
-	FVector FlatCameraForward = FRotator(0.0f, CameraRotation.Yaw, 0.0f).Vector();
-	float CosAngle = FVector::DotProduct(ActorForward, FlatCameraForward);
-	if (CosAngle < 0.2f)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Não podes interagir de costas!"));
-		return;
-	}
-	// 3. Configuração do Start e End
-	// Start sai do peito (Z+60) e End usa a direção inclinada
+
+	// 2. ORIGEM E FIM: Agora tudo nasce e morre em relação ao corpo, não à câmara
 	FVector start = GetActorLocation() + FVector(0.0f, 0.0f, 60.0f) + (ActorForward * 40.0f);
 	FVector end = start + (InteractionDirection * maxInteractionDistance);
 	DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 5.0f);
