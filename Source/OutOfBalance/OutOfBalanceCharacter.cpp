@@ -88,7 +88,6 @@ void AOutOfBalanceCharacter::Interact()
 	FRotator ActorRotation = GetActorRotation();
 	FRotator InclinedRotation = FRotator(-25.0f, ActorRotation.Yaw, 0.0f);
 	FVector InteractionDirection = InclinedRotation.Vector();
-
 	// 2. ORIGEM E FIM: Agora tudo nasce e morre em relação ao corpo, não à câmara
 	FVector start = GetActorLocation() + FVector(0.0f, 0.0f, 60.0f) + (ActorForward * 40.0f);
 	FVector end = start + (InteractionDirection * maxInteractionDistance);
