@@ -11,6 +11,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "OutOfBalance.h"
+#include "Blueprint/UserWidget.h"
+#include "EnhancedInputSubsystems.h"
+#include "Components/InputComponent.h"
 
 #include "CollectableItem.h"
 #include "Lock.h"
@@ -71,10 +74,50 @@ void AOutOfBalanceCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		// Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOutOfBalanceCharacter::Interact);
+
+		// Inventory 
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AOutOfBalanceCharacter::ToggleInventory);
 	}
 	else
 	{
 		UE_LOG(LogOutOfBalance, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
+void AOutOfBalanceCharacter::ToggleInventory(const FInputActionValue& Value)
+{
+	if (!InventoryWidgetClass) return;
+
+	if (!InventoryWidgetInstance)
+	{
+		InventoryWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), InventoryWidgetClass);
+	}
+
+	if (InventoryWidgetInstance)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (!PC) return;
+
+		if (!InventoryWidgetInstance->IsInViewport())
+		{
+			InventoryWidgetInstance->AddToViewport();
+
+			// --- ESTA LINHA É A CHAVE ---
+			// Ela obriga o Blueprint a rodar a função "UpdateInventory" agora!
+			UFunction* UpdateFunc = InventoryWidgetInstance->FindFunction(FName("UpdateInventory"));
+			if (UpdateFunc) InventoryWidgetInstance->ProcessEvent(UpdateFunc, nullptr);
+
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		else
+		{
+			InventoryWidgetInstance->RemoveFromParent();
+			PC->SetInputMode(FInputModeGameOnly());
+			PC->bShowMouseCursor = false;
+		}
 	}
 }
 
@@ -114,6 +157,13 @@ void AOutOfBalanceCharacter::Interact()
 			ACollectableItem* collectableItem = Cast<ACollectableItem>(hitActor);
 			if (collectableItem) {
 				inventory.Add(collectableItem->itemName);
+				UE_LOG(LogTemp, Warning, TEXT("Item Adicionado: %s. Total no inventario: %d"), *collectableItem->itemName, inventory.Num());
+				
+				if (InventoryWidgetInstance)
+				{
+					UFunction* UpdateFunc = InventoryWidgetInstance->FindFunction(FName("UpdateInventory"));
+					if (UpdateFunc) InventoryWidgetInstance->ProcessEvent(UpdateFunc, nullptr);
+				}
 
 				collectableItem->Destroy();
 			}
@@ -137,7 +187,6 @@ void AOutOfBalanceCharacter::Interact()
 		UE_LOG(LogTemp, Display, TEXT("No actor hit."));
 	}
 }
-
 
 void AOutOfBalanceCharacter::Move(const FInputActionValue& Value)
 {

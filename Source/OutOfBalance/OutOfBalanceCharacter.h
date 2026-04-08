@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "OutOfBalanceCharacter.generated.h"
 
+class UInputMappingContext;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -52,6 +53,15 @@ protected:
 	/** Inract with objects */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* InteractAction;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TSubclassOf<class UUserWidget> InventoryWidgetClass;
+
+	UPROPERTY()
+	class UUserWidget* InventoryWidgetInstance;
+
+	UPROPERTY(EditAnywhere, Category = "Input") //BlueprintReadOnly,
+	UInputAction* InventoryAction;
 
 public:
 
@@ -105,7 +115,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float interactionSphereRadius = 75.0f;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TArray<FString> inventory;
+
+	void ToggleInventory(const FInputActionValue& value);
 };
 
