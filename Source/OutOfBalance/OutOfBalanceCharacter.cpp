@@ -159,6 +159,12 @@ void AOutOfBalanceCharacter::Interact()
 				inventory.Add(collectableItem->itemName);
 				UE_LOG(LogTemp, Warning, TEXT("Item Adicionado: %s. Total no inventario: %d"), *collectableItem->itemName, inventory.Num());
 				
+				if (inventory.Contains("Photo_A") && inventory.Contains("Photo_B")) {
+					inventory.Remove("Photo_A");
+					inventory.Remove("Photo_B");
+					inventory.Add("Photo");
+				}
+
 				if (InventoryWidgetInstance)
 				{
 					UFunction* UpdateFunc = InventoryWidgetInstance->FindFunction(FName("UpdateInventory"));

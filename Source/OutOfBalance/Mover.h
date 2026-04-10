@@ -35,11 +35,19 @@ public:
 	float moveTime = 4.0f;
 
 	UPROPERTY(VisibleAnywhere)
-	bool reachedTarget = false;
+	bool reachedLocation = false;
+
+	FRotator startRotation;
+
+	FRotator targetRotation;
+
+	UPROPERTY(EditAnywhere)
+	FRotator rotationOffSet;
+
+	bool reachedRotation = false;
 
 	bool getShouldMove();
 	void setShouldMove(bool newShouldMove);
-
 
 private:
 	UPROPERTY(VisibleAnywhere)

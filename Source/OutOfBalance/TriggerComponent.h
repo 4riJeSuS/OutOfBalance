@@ -30,9 +30,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditAnywhere)
-	AActor* moverActor;
+	TArray<AActor*> moverActors;
 
-	UMover* mover;
+	TArray<UMover*> movers;
 
 	void Trigger(bool newTriggerValue);
 
