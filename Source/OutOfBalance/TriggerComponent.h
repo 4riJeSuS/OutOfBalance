@@ -34,6 +34,7 @@ public:
 
 	TArray<UMover*> movers;
 
+	UFUNCTION(BlueprintCallable)
 	void Trigger(bool newTriggerValue);
 
 	//NÃO SE SE IREMOS USAR
