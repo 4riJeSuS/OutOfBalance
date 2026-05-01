@@ -33,14 +33,16 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UTriggerComponent* triggerComp;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* keyItemMesh;
 
 	UPROPERTY(EditAnywhere)
 	FString keyItemName;
 
+	UFUNCTION(BlueprintCallable, Category = "Lock")
 	void setIsKeyPlaced(bool newIsKeyPlaced);
 	
+	UFUNCTION(BlueprintCallable, Category = "Lock")
 	bool getIsKeyPlaced();
 
 private:
