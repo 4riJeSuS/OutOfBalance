@@ -115,7 +115,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	float interactionSphereRadius = 75.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TArray<FString> inventory;
 
 	void ToggleInventory(const FInputActionValue& value);
